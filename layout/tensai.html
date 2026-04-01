@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR"> 
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tensai Plus Dashboard</title>
+  <style>
+    /* ======== BLOCO DE FONTE ANEK GURMUKHI ======== */
+        @font-face {
+            font-family: 'Syne-SemiBold';
+            src: url('fonts/Syne-SemiBold.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+    /* ======== FIM DO BLOCO DE FONTE ANEK GURMUKHI ======== */
+
+    .card {
+      position: relative;
+      overflow: hidden; /* Garante que a imagem não ultrapasse os limites do card */
+    }
+    .card img {
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      position: absolute; 
+      top: 0;
+      left: 0;
+      z-index: 0; 
+    }
+    .card div {
+      position: relative;
+      z-index: 1; 
+      background: rgba(0, 0, 0, 0.5); 
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    body {
+      font-family: 'Syne-SemiBold', sans-serif; 
+      background-color: #020802;
+      color: #ffffff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ====================== NAVBAR FIXA ====================== */
+    .navbar {
+      background: linear-gradient(90deg, #000000, #152018);
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;           
+      align-items: center; 
+      border-bottom: 1px solid rgba(61,169,153,0.2);
+      height: 60px;
+    }
+
+    /* LOGO FICA BEM À ESQUERDA */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 20px; 
+      transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out;
+      cursor: pointer; /* Indica que podemos clicar na logo */
+    }
+    .logo img {
+      width: 120px; 
+      height: auto;
+      transition: width 0.3s ease-in-out;
+    }
+    .logo.small img {
+      width: 40px; 
+    }
+    .logo span {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    /* CONTAINER DA NAVBAR */
+    .navbar-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      flex: 1;
+      align-items: center; 
+      justify-content: center; 
+      padding: 10px 20px;
+      position: relative;
+    }
+
+    /* ÍCONE DE EXPANDIR (HAMBÚRGUER) */
+    .toggle-button {
+      position: fixed;  /* fixo no viewport */
+      top: 10px;        /* distância do topo, ajuste ao seu gosto */
+      left: 250px;      /* distância da esquerda, ajuste ao seu gosto */
+      transform: none;  /* remove translateY para não centralizar na altura */
+      z-index: 2000;    /* para ficar na frente de tudo */
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-button img {
+      width: 28px;
+      height: 28px;
+    }
+
+    /* 
+      ESCONDE O HAMBÚRGUER EM TELAS <= 768px 
+      (caso queira outro breakpoint, ajuste abaixo)
+    */
+    @media (max-width: 768px) {
+      .toggle-button {
+        display: none !important;
+      }
+    }
+
+    /* BARRA DE BUSCA */
+    .search {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(90deg, #0a170e, #121d15, #162119);
+      padding: 5px 10px;
+      border-radius: 8px;
+      width: 300px;
+      z-index: 1;
+    }
+    .search .icon {
+      font-size: 18px;
+      color: #3da999;
+      margin-right: 10px;
+    }
+    .search input {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #ffffff;
+      outline: none;
+      font-size: 14px;
+      padding: 10px;
+    }
+    .centralize-search {
+      margin: 0 auto; 
+      display: flex; 
+      justify-content: center; 
+    }
+
+    /* USUÁRIO + AVATAR */
+    .user {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .user img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .user span {
+      display: flex;
+      flex-direction: column;
+    }
+    .user span strong {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .user span small {
+      font-size: 12px;
+    }
+
+    /* DROPDOWN */
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #060F09;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      top: 100%; 
+      right: 0;
+      border-radius: 8px;
+    }
+    .dropdown-content a {
+      color: #ffffff;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover {
+      background-color: #17221B;
+    }
+
+    /* MAIN + SIDEBAR */
+    .main {
+      display: flex;
+      flex: 1;
+      margin-top: 60px; /* Espaço para a navbar fixa */
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #000000, #071109);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(0);
+      position: fixed;
+      height: 100%;
+      z-index: 999;
+      border-right: 1px solid rgba(61,169,153,0.2);
+    }
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    .sidebar a {
+      color: #a3d4a5;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, color 0.3s;
+      background: transparent; 
+    }
+    .sidebar a:hover {
+      background: linear-gradient(90deg, #0a170e, #121d15, #162119);
+      color: #ffffff;
+    }
+    .sidebar a.active {
+      background: linear-gradient(90deg, #0a170e, #121d15, #162119);
+      color: #ffffff;
+    }
+    .sidebar a img {
+      width: 20px;
+      height: 20px;
+    }
+    .sidebar div:last-child {
+      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Cartão lateral "Produtos novos" */
+    .new-products-card {
+      width: 300px;
+      padding: 20px;
+      background-color: #3da999;
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative; 
+      overflow: hidden; 
+      margin-bottom: 20px; 
+    }
+    
+    .new-products-card::before {
+      content: "";
+      position: absolute;
+      width: 250px; 
+      height: 250px;
+      background: radial-gradient(circle, rgba(42, 193, 171, 0.6) 20%, rgba(42, 193, 171, 0.3) 80%);
+      border-radius: 50%;
+      top: 50%; 
+      right: -100px; 
+      transform: translateY(-50%); 
+      z-index: 0;
+      filter: blur(15px);
+    }
+    .new-products-card * {
+      position: relative;
+      z-index: 1;
+    }
+    .new-products-card .logo {
+      display: block;
+      margin: 0 auto; 
+      width: 40px; 
+      height: auto;
+    }
+    .new-products-card .title {
+      font-size: 18px;
+      font-weight: bold;
+      font-family: 'Syne-SemiBold', sans-serif; 
+      text-align: center;
+      margin: 10px 0 5px 0;
+    }
+    .new-products-card .link {
+      font-size: 14px;
+      text-decoration: underline;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      margin-left: 250px;
+      transition: margin-left 0.3s ease-in-out;
+      border-left: 1px solid rgba(61,169,153,0.2);
+    }
+    .content.collapsed {
+      margin-left: 0;
+    }
+
+    /* CONTAINER */
+    .container {
+      max-width: 1270px; 
+      margin: 0 auto;
+      padding: 0 20px; 
+    }
+
+    /* BANNER COM BORDA FINA */
+    .banner {
+      padding: 50px 643px; 
+      border-radius: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #ffffff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      position: relative;
+      cursor: pointer;
+      transition: background-image 0.5s;
+      background: #101b13 url('https://i.imgur.com/uwj09kC.jpeg') center/cover no-repeat;
+      max-width: 1400px; 
+      margin: 0 auto;
+      border: 1px solid rgba(61,169,153,0.2);
+    }
+    @media (max-width: 768px) {
+      .banner {
+        background: #101b13 url('https://i.imgur.com/F9pnXPz.png') center/cover no-repeat;
+        height: 200px; 
+        padding: 40px 20px;
+        margin-bottom: 30px;
+      }
+    }
+    @media (min-width: 769px) {
+      .banner {
+        height: 300px; 
+      }
+    }
+
+    /* CARDS MANTENDO TAMANHO FIXO COM 4 COLUNAS */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 30px; 
+      justify-items: center;
+      margin-bottom: 80px;
+    }
+    @media (max-width: 1024px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr); 
+      }
+    }
+    @media (max-width: 768px) {
+      .cards {
+        grid-template-columns: repeat(1, 1fr);
+      }
+    }
+    .card {
+      width: 300px; 
+      height: 450px;
+      background: linear-gradient(135deg, #0b0f0b, #0a0d0a, #080c08);
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 20px;
+      color: #ffffff;
+      font-weight: bold;
+      transition: transform 0.3s, background-color 0.3s;
+      border: 1px solid rgba(61,169,153,0.2);
+      padding: 20px; 
+      box-sizing: border-box;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    footer {
+      background: linear-gradient(90deg, #000000, #152018);
+      text-align: center;
+      padding: 5px; 
+      font-size: 12px; 
+      color: #a3d4a5;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 1000;
+      border-top: 1px solid rgba(61, 169, 153, 0.2);
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Texto menor e link para LisboaCodes */
+    .footer-small {
+      font-size: 8px; /* Texto menor */
+    }
+    .footer-small a {
+      color: #a3d4a5;
+      text-decoration: none;
+    }
+    .footer-small a:hover {
+      text-decoration: underline;
+    }
+.ver-agora {
+  display: block;
+  margin-top: 10px !important; /* Ajuste o valor e use !important */
+}
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo" id="logo">
+      <img src="https://i.imgur.com/LA5cAsi.png" alt="Tensai Plus Logo">
+      <span id="logo-text">
+       <!-- Texto opcional, pode ser removido ou personalizado -->
+      </span>
+    </div>
+  
+    <div class="navbar-container">
+      <button class="toggle-button" onclick="toggleSidebarAndLogo()">
+        <img src="https://i.imgur.com/bMquDUd.png" alt="Ícone de Expandir"/>
+      </button>
+     <!-- <div class="centralize-search">
+        <div class="search">
+          <span class="icon">&#128269;</span>
+          <input type="text" placeholder="Pesquise aqui...">
+        </div>
+      </div>-->
+    </div>
+
+    <div class="user" onclick="toggleDropdown()">
+      <img src="https://i.imgur.com/usV0pUU.png" alt="User">
+      <span>
+        <strong>Adriano da Silva</strong>
+        <small>Usuário</small>
+      </span>
+      <div class="dropdown-content">
+        <a href="#">Configurações</a>
+        <a href="#">Logout</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="main">
+    <div class="sidebar" id="sidebar">
+      <div>
+        <a href="#" class="active">
+          <img src="https://i.imgur.com/q8ssWaa.png" alt="Home Icon"> Início
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/jwK3Byn.png" alt="Tools Icon"> Ferramentas
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/Z5Ma1UX.png" alt="Materials Icon"> Materiais
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/woakpcB.png" alt="Support Icon"> Suporte
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/SQhdPJX.png" alt="WhatsApp Icon"> Grupo do Whats
+        </a>
+      </div>
+      <div>
+        <div class="new-products-card">
+          <img src="https://i.imgur.com/LjG8Jw8.png" alt="Logo" class="logo"><br>
+          <div class="title">Produtos novos</div>
+          <div class="link ver-agora">Ver agora</div>
+        </div>
+      </div>
+    </div>
+   
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="content" id="content">
+      <div class="container">
+        <div class="banner" onclick="nextSlide()"></div>
+        <p></p>
+        <div class="cards">
+          <!-- Card 1 -->
+          <div class="card">
+            <img src="https://i.imgur.com/T8CWGzD.jpeg" alt="Ferramentas Premium">
+          </div>
+          <!-- Card 2 -->
+          <div class="card">
+            <img src="https://i.imgur.com/cl0IRwr.jpeg" alt="Ferramentas Premium">
+          </div>
+          <!-- Card 3 -->
+          <div class="card">
+            <img src="https://i.imgur.com/2aqElCz.jpeg" alt="Ferramentas Premium">
+          </div>
+          <!-- Card 4 -->
+          <div class="card">
+            <img src="https://i.imgur.com/RLiCndC.jpeg" alt="Ferramentas Premium">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer> <br>
+    © 2025 Tensai Plus - Todos os direitos reservados. <br> <!--Política de privacidade - Termos de uso--> <br>
+    <span class="footer-small">
+      <!-- Tensai Theme powered by - 
+     <a href="https://lisboacodes.tech/" target="_blank" rel="noopener noreferrer">LisboaCodes</a>-->
+    </span>
+  </footer>
+
+  <script>
+    // Dropdown do usuário
+    function toggleDropdown() {
+      const dropdownContent = document.querySelector('.dropdown-content');
+      dropdownContent.style.display = 
+        (dropdownContent.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Slides no banner
+    let currentSlide = 0;
+    const slides = [
+      'https://i.imgur.com/uwj09kC.jpeg',
+      //'https://i.imgur.com/F9pnXPz.png'
+    ];
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      document.querySelector('.banner').style.backgroundImage =
+        `url('${slides[currentSlide]}')`;
+    }
+
+    // Expandir/Recolher Sidebar e ajustar a logo
+    function toggleSidebarAndLogo() {
+      const sidebar = document.getElementById('sidebar');
+      const content = document.getElementById('content');
+      const logoContainer = document.getElementById('logo');
+      const logo = logoContainer.querySelector('img');
+
+      sidebar.classList.toggle('hidden');
+      content.classList.toggle('collapsed');
+
+      // Trocar a logo para menor ou maior
+      if (sidebar.classList.contains('hidden')) {
+        logo.setAttribute('src', 'https://i.imgur.com/vmht3wE.png'); 
+        logoContainer.classList.add('small');
+      } else {
+        logo.setAttribute('src', 'https://i.imgur.com/LA5cAsi.png'); 
+        logoContainer.classList.remove('small');
+      }
+    }
+
+    // Ajusta comportamento inicial:
+    // Em telas maiores, sidebar começa aberta; em telas menores, começa fechada.
+    document.addEventListener("DOMContentLoaded", function() {
+      const sidebar = document.getElementById("sidebar");
+      const content = document.getElementById("content");
+      const logoContainer = document.getElementById('logo');
+
+      if (window.innerWidth < 768) {
+        // Tela pequena: inicia fechada
+        sidebar.classList.add("hidden");
+        content.classList.add("collapsed");
+      } else {
+        // Tela grande: inicia aberta
+        sidebar.classList.remove("hidden");
+        content.classList.remove("collapsed");
+      }
+
+      // Em modo mobile, ao clicar na logo, TAMBÉM toggla (abre ou fecha) a sidebar
+      logoContainer.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          toggleSidebarAndLogo(); 
+        }
+      });
+    });
+
+    // Fechar o dropdown ao clicar fora
+    window.onclick = function(event) {
+      if (!event.target.matches('.user, .user *')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.style.display === "block") {
+            openDropdown.style.display = "none";
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

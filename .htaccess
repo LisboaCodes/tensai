@@ -1,0 +1,97 @@
+RewriteEngine On
+RewriteRule ^materiais$ materiais.php [L]
+RewriteRule ^loja$ loja.php [L]
+RewriteRule ^dashboard$ dashboard.php [L]
+RewriteRule ^login$ index.php [L]
+RewriteRule ^sair$ logout.php [L]
+RewriteRule ^logout$ logout.php [L]
+RewriteRule ^perfil$ perfil.php [L]
+RewriteRule ^faturas$ faturas.php [L]
+RewriteRule ^banido$ banido.php [L]
+RewriteRule ^suporte$ tickets.php [L]
+RewriteRule ^ferramentas$ ferramentas.php [L]
+RewriteRule ^categorias$ categorias.php [L]
+RewriteRule ^planos$ planos.php [L]
+RewriteRule ^guia$ start.php [L]
+RewriteRule ^telegram$ telegram.php [L]
+RewriteRule ^storage$ storage.php [L]
+RewriteRule ^reportar$ reportar.php [L]
+RewriteRule ^notificacoes$ notificacoes.php [L]
+# Redireciona URL amigável "c/categorias=ias" para "categorias.php?categoria=ias"
+RewriteCond %{REQUEST_URI} ^/c/categorias=(.*)$
+RewriteRule ^c/categorias=(.*)$ categorias.php?categoria=$1 [L,QSA]
+
+
+RewriteRule ^freepik$ freepik.php [L]
+RewriteRule ^designbr$ designbr.php [L]
+RewriteRule ^epidemic$ epidemic.php [L]
+RewriteRule ^motionarray$ motionarray.php [L]
+RewriteRule ^artlist$ artlist.php [L]
+RewriteRule ^deeezy$ deeezy.php [L]
+RewriteRule ^adobe$ adobe.php [L]
+RewriteRule ^pixelbuddha$ pixelbuddha.php [L]
+RewriteRule ^creativefabrica$ creativefabrica.php [L]
+RewriteRule ^flaticon$ flaticon.php [L]
+RewriteRule ^vecteezy$ vecteezy.php [L]
+RewriteRule ^lovepik$ lovepik.php [L]
+RewriteRule ^baixardesign$ baixardesign.php [L]
+
+
+RewriteRule ^designi$ designi.php [L]
+RewriteRule ^envato$ envato.php [L]
+RewriteRule ^chat$ get_online_users.php [L]
+
+
+
+# Redirecionamentos app
+RewriteRule ^comece-aqui$ comece-aqui.php [L]
+RewriteRule ^gpt$ gpt.php [L]
+RewriteRule ^mid$ mid.php [L]
+RewriteRule ^tools$ tools.php [L]
+RewriteRule ^suporte$ suporte.php [L]
+RewriteRule ^ia$ inteligencia.php [L]
+RewriteRule ^voicefy$ voicefy.php [L]
+RewriteRule ^capcut$ capcut.php [L]
+RewriteRule ^canva$ canva.php [L]
+RewriteRule ^storage$ storage.php [L]
+RewriteRule ^leonardo-ai$ leonardo.php [L]
+RewriteRule ^elevenlabs$ elevenlabs.php [L]
+RewriteRule ^pika-ai$ pika.php [L]
+RewriteRule ^suno$ suno.php [L]
+RewriteRule ^vectorizer$ vectorizer.php [L]
+RewriteRule ^gamma$ gamma.php [L]
+RewriteRule ^area51/packstoriescanvaanimado$ area51/storiesanimados.php [L]
+RewriteRule ^vitalicio$ vitalicio.php [L]
+RewriteRule ^canvatemplates$ canvatemplates.php [L]
+RewriteRule ^ideogram$ ideogram.php [L]
+RewriteRule ^plataformas$ plataformas.php [L]
+RewriteRule ^designi$ designi.php [L]
+RewriteRule ^copilot$ copilot.php [L]
+RewriteRule ^black$ black.php [L]
+
+RewriteRule ^area51/moraespolitica$ area51/moraespolitica.php [L]
+
+
+# Se a URL requisitada for "/app/categorias.php" com query "categoria=ALGUMA_COISA",
+# redireciona (301) para "/c/categorias=ALGUMA_COISA".
+RewriteCond %{THE_REQUEST} \s/app/categorias\.php\?categoria=([^\s]+)
+RewriteRule ^ /c/categorias=%1 [R=301,L]
+
+# Depois, quando alguém bater em /c/categorias=chatgpt, internamente 
+# reescreve para categorias.php?categoria=$1, sem mudar a URL no navegador
+RewriteCond %{REQUEST_URI} ^/c/categorias=(.*)$
+RewriteRule ^c/categorias=(.*)$ categorias.php?categoria=$1 [L,QSA]
+
+
+# Redirecionamento monkey
+RewriteRule ^studios-monkey$ emonkey.php [L]
+RewriteRule ^acesso-after-effects$ acesso-after-effects.php [L]
+RewriteRule ^acesso-premiere-pro$ acesso-premiere-pro.php [L]
+RewriteRule ^photoshop$ photoshop.php [L]
+RewriteRule ^plataformas$ plataformas.php [L]
+RewriteRule ^remini$ remini.php [L]
+RewriteRule ^plugins$ plugins.php [L]
+
+
+
+

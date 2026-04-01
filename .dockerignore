@@ -1,0 +1,9 @@
+Dockerfile
+.dockerignore
+.git
+*.sql
+*.zip
+webhook_log.txt
+bkp/
+backup/
+vendor_backup/

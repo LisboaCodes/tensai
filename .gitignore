@@ -1,0 +1,8 @@
+webhook_log.txt
+backup/
+bkp/
+vendor_backup/
+webhookbackup.php
+webhookphp-backup.php
+*.zip
+*.sql

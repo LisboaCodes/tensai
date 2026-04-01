@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR"> 
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tensai Plus Dashboard</title>
+   <style>
+ /* ======== BLOCO DE FONTE ANEK GURMUKHI ======== */
+        @font-face {
+            font-family: 'Syne-SemiBold';
+            src: url('fonts/Syne-SemiBold.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+    /* ======== FIM DO BLOCO DE FONTE ANEK GURMUKHI ======== */
+    
+    body {
+      font-family: 'SYNE-SEMIBOLD', sans-serif;
+      background-color: #020802;
+      color: #ffffff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ====================== NAVBAR FIXA ====================== */
+    .navbar {
+      background: linear-gradient(90deg, #000000, #152018);
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;           
+      align-items: center; 
+      border-bottom: 1px solid rgba(61,169,153,0.2);
+      height: 60px;
+    }
+
+    /* LOGO FICA BEM À ESQUERDA */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 20px; 
+      transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out;
+      cursor: pointer; /* Para permitir que clique na logo em mobile, se quiser abrir sidebar */
+    }
+    .logo img {
+      width: 120px;
+      height: auto;
+      transition: width 0.3s ease-in-out;
+    }
+    .logo.small img {
+      width: 40px;
+    }
+    .logo span {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    /* CONTAINER DA NAVBAR */
+    .navbar-container {
+      max-width: 1610px;
+      margin: 0 auto;
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      position: relative;
+    }
+
+    /* ÍCONE DE EXPANDIR (HAMBÚRGUER) */
+    .toggle-button {
+      /* Torna fixo no desktop */
+      position: fixed;  
+      top: 10px;        
+      left: 250px;      /* Ajuste conforme necessidade */
+      transform: none;  
+      z-index: 2000;    
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-button img {
+      width: 28px;
+      height: 28px;
+    }
+    /* Esconder em telas <= 768px */
+    @media (max-width: 768px) {
+      .toggle-button {
+        display: none !important;
+      }
+    }
+
+    /* BARRA DE BUSCA */
+    .search {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(90deg, #0a170e, #121d15, #162119);
+      padding: 5px 10px;
+      border-radius: 8px;
+      width: 300px;
+      z-index: 1;
+    }
+    .search .icon {
+      font-size: 18px;
+      color: #3da999;
+      margin-right: 10px;
+    }
+    .search input {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #ffffff;
+      outline: none;
+      font-size: 14px;
+      padding: 10px;
+    }
+    .centralize-search {
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* USUÁRIO + AVATAR */
+    .user {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .user img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .user span {
+      display: flex;
+      flex-direction: column;
+    }
+    .user span strong {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .user span small {
+      font-size: 12px;
+    }
+
+    /* DROPDOWN */
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #060F09;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      top: 100%; 
+      right: 0;
+      border-radius: 8px;
+    }
+    .dropdown-content a {
+      color: #ffffff;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover {
+      background-color: #17221B;
+    }
+
+    /* MAIN + SIDEBAR */
+    .main {
+      display: flex;
+      flex: 1;
+      margin-top: 60px;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #000000, #071109);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(0);
+      position: fixed;
+      height: 100%;
+      z-index: 999;
+      border-right: 1px solid rgba(61,169,153,0.2);
+    }
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    .sidebar a {
+      color: #a3d4a5;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, color 0.3s;
+      background: transparent;
+    }
+    .sidebar a:hover {
+      background: linear-gradient(90deg, #0a170e, #121d15, #162119);
+      color: #ffffff;
+    }
+    .sidebar a.active {
+      background: linear-gradient(90deg, #0a170e, #121d15, #162119);
+      color: #ffffff;
+    }
+    .sidebar a img {
+      width: 20px;
+      height: 20px;
+    }
+    .sidebar div:last-child {
+      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Cartão lateral "Produtos novos" */
+    .new-products-card {
+      width: 300px;
+      padding: 20px;
+      background-color: #3da999;
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .new-products-card::before {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(42, 193, 171, 0.6) 20%, rgba(42, 193, 171, 0.3) 80%);
+      border-radius: 50%;
+      top: 50%;
+      right: -100px;
+      transform: translateY(-50%);
+      z-index: 0;
+      filter: blur(15px);
+    }
+    .new-products-card * {
+      position: relative;
+      z-index: 1;
+    }
+    .new-products-card .logo {
+      display: block;
+      margin: 0 auto;
+      width: 40px;
+      height: auto;
+    }
+    .new-products-card .title {
+      font-size: 18px;
+      font-weight: bold;
+      font-family: 'AnekGurmukhi', sans-serif;
+      text-align: center;
+      margin: 10px 0 5px 0;
+    }
+    .new-products-card .link {
+      font-size: 14px;
+      text-decoration: underline;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      margin-left: 250px;
+      transition: margin-left 0.3s ease-in-out;
+    }
+
+    /* Responsivo se sidebar estiver escondida */
+    .content.collapsed {
+      margin-left: 0;
+    }
+
+    .container {
+      max-width: 1270px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      gap: 20px;
+    }
+
+    .form-container {
+      flex: 2;
+      background: #0d1610;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 12px rgba(61, 169, 153, 0.15);
+      border: 1px solid rgba(61, 169, 153, 0.3);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #3da999;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(61, 169, 153, 0.5);
+      background: #152018;
+      color: #a3d4a5;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s ease-in-out;
+      box-sizing: border-box;
+    }
+    .form-group textarea {
+      height: 150px;
+      resize: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #3da999;
+      box-shadow: 0 0 10px rgba(61, 169, 153, 0.5);
+    }
+    .form-group input[type="file"] {
+      display: none;
+    }
+    .file-upload {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #152018;
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      border: 1px solid rgba(61, 169, 153, 0.5);
+      transition: all 0.3s ease-in-out;
+    }
+    .file-upload:hover {
+      background: #1a2a21;
+    }
+    .file-upload span {
+      flex: 1;
+      color: #a3d4a5;
+      font-size: 14px;
+      text-align: left;
+      padding-left: 10px;
+    }
+    .file-upload button {
+      background: #3da999;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease-in-out;
+    }
+    .file-upload button:hover {
+      background: #2f8f75;
+    }
+    .btn-submit {
+      background: #25ae9a;
+      color: white;
+      padding: 20px 60px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-size: 18px;
+      transition: 0.3s ease-in-out;
+      width: 300px;
+      text-align: center;
+    }
+    .btn-submit:hover {
+      background: #1f9c8b;
+      transform: scale(1.05);
+    }
+    .side-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .side-container .button {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #0d1610;
+      color: #3da999;
+      padding: 15px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      border: 1px solid rgba(61, 169, 153, 0.5);
+    }
+    .side-container .button:hover {
+      background: #152018;
+      transform: scale(1.05);
+    }
+    .side-container .button img {
+      width: 28px;
+      height: 28px;
+    }
+    .note {
+      background: #121d15;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #a3d4a5;
+      border: 1px solid rgba(61, 169, 153, 0.5);
+      box-shadow: 0 0 10px rgba(61, 169, 153, 0.2);
+    }
+
+    footer {
+      background: linear-gradient(90deg, #000000, #152018);
+      text-align: center;
+      padding: 5px;
+      font-size: 12px;
+      color: #a3d4a5;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 1000;
+      border-top: 1px solid rgba(61,169,153,0.2);
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .footer-small {
+      font-size: 10px;
+    }
+    .navbar .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #060F09;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      top: 100%; 
+      right: 0;
+      border-radius: 8px;
+    }
+    .navbar .dropdown-content a {
+      color: #ffffff;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: block;
+    }
+    .navbar .dropdown-content a:hover {
+      background-color: #17221B;
+    }
+        .ver-agora {
+  display: block;
+  margin-top: 10px !important; /* Ajuste o valor e use !important */
+}
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo" id="logo">
+      <img src="https://i.imgur.com/LA5cAsi.png" alt="Tensai Plus Logo">
+      <span id="logo-text"> <!-- Texto opcional --> </span>
+    </div>
+  
+    <div class="navbar-container">
+      <button class="toggle-button" onclick="toggleSidebarAndLogo()">
+        <img src="https://i.imgur.com/bMquDUd.png" alt="Ícone de Expandir"/>
+      </button>
+      <!--<div class="centralize-search">
+        <div class="search">
+          <span class="icon">&#128269;</span>
+          <input type="text" placeholder="Pesquise aqui...">
+        </div>
+      </div>-->
+    </div>
+    <div class="user" onclick="toggleDropdown()">
+      <img src="https://i.imgur.com/usV0pUU.png" alt="User">
+      <span>
+        <strong>Adriano da Silva</strong>
+        <small>Usuário</small>
+      </span>
+      <div class="dropdown-content">
+        <a href="#">Configurações</a>
+        <a href="#">Logout</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="main">
+    <div class="sidebar" id="sidebar">
+      <div>
+        <a href="#">
+          <img src="https://i.imgur.com/q8ssWaa.png" alt="Home Icon"> Início
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/jwK3Byn.png" alt="Tools Icon"> Ferramentas
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/Z5Ma1UX.png" alt="Materials Icon"> Materiais
+        </a>
+        <a href="#" class="active">
+          <img src="https://i.imgur.com/woakpcB.png" alt="Support Icon"> Suporte
+        </a>
+        <a href="#">
+          <img src="https://i.imgur.com/SQhdPJX.png" alt="WhatsApp Icon"> Grupo do Whats
+        </a>
+      </div>
+      <div>
+        <div class="new-products-card">
+          <img src="https://i.imgur.com/LjG8Jw8.png" alt="Logo" class="logo"><br>
+          <div class="title">Produtos novos</div>
+          <div class="link ver-agora">Ver agora</div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="content" id="content"> 
+      <br><br><br>
+      <div class="container">
+        <div class="form-container">
+          <h2>Não exite em solicitar suporte</h2>
+          <form>
+            <div class="form-group">
+              <label for="titulo">Título</label>
+              <input type="text" id="titulo">
+            </div>
+            <div class="form-group">
+              <label for="mensagem">Escreva sua mensagem abaixo</label>
+              <textarea id="mensagem" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="arquivo">Anexo (Opcional)</label>
+              <label class="file-upload">
+                <button type="button">Escolher arquivo</button>
+                <span id="file-name">Nenhum arquivo escolhido</span>
+                <input type="file" id="arquivo" onchange="updateFileName()">
+              </label>
+            </div>
+            <button type="submit" class="btn-submit">ENVIAR</button>
+          </form>
+        </div>
+
+        <div class="side-container">
+          <div class="side-container">
+            <div class="button">
+              <img src="https://i.imgur.com/Vuu19cc.png" alt="Ícone WhatsApp"> 
+              Solicite suporte via WhatsApp<br>
+              +55 (xx) xxxx-xxxx
+            </div>
+            <div class="button">
+              <img src="https://i.imgur.com/Fpiyph2.png" alt="Ícone E-mail"> 
+              E-mail para suporte
+              Contato@xxx.com.br
+            </div>
+            <div class="note">
+              <strong>Nota:</strong><br>
+              Informamos que o prazo para resposta ao seu ticket é de até 24 horas. <br><br>
+              Durante esse período, nossa equipe dedicada estará analisando sua solicitação para garantir que você receba um atendimento de qualidade e soluções adequadas para sua necessidade. 
+              <br><br><b>Agradecemos pela sua paciência e compreensão, e estamos à disposição para ajudar da melhor forma possível!</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+ <footer> <br>
+    © 2025 Tensai Plus - Todos os direitos reservados. <br> <!--Política de privacidade - Termos de uso--> <br>
+    <span class="footer-small">
+      <!-- Tensai Theme powered by - 
+     <a href="https://lisboacodes.tech/" target="_blank" rel="noopener noreferrer">LisboaCodes</a>-->
+    </span>
+  </footer>
+
+  <script>
+    // Dropdown do usuário
+    function toggleDropdown() {
+      const dropdownContent = document.querySelector('.dropdown-content');
+      dropdownContent.style.display = 
+        (dropdownContent.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Mostrar nome do arquivo no campo "Nenhum arquivo escolhido"
+    function updateFileName() {
+      const input = document.getElementById("arquivo");
+      const fileNameSpan = document.getElementById("file-name");
+      if (input.files.length > 0) {
+        fileNameSpan.textContent = input.files[0].name;
+      } else {
+        fileNameSpan.textContent = "Nenhum arquivo escolhido";
+      }
+    }
+
+    // Expandir/Recolher Sidebar e ajustar a logo
+    function toggleSidebarAndLogo() {
+      const sidebar = document.getElementById('sidebar');
+      const content = document.getElementById('content');
+      const logoContainer = document.getElementById('logo');
+      const logo = logoContainer.querySelector('img');
+
+      // Alternar classe da sidebar
+      sidebar.classList.toggle('hidden');
+      content.classList.toggle('collapsed');
+
+      // Verifica se a sidebar está recolhida e troca a logo
+      if (sidebar.classList.contains('hidden')) {
+        logo.src = 'https://i.imgur.com/vmht3wE.png';
+        logoContainer.classList.add('small');
+      } else {
+        logo.src = 'https://i.imgur.com/LA5cAsi.png';
+        logoContainer.classList.remove('small');
+      }
+    }
+
+    // Fechar o dropdown ao clicar fora
+    window.onclick = function(event) {
+      if (!event.target.matches('.user, .user *')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.style.display === "block") {
+            openDropdown.style.display = "none";
+          }
+        }
+      }
+    }
+
+    // Lógica para iniciar sidebar fechada no mobile e aberta no desktop
+    document.addEventListener("DOMContentLoaded", function() {
+      const sidebar = document.getElementById("sidebar");
+      const content = document.getElementById("content");
+      const logoContainer = document.getElementById('logo');
+
+      if (window.innerWidth < 768) {
+        sidebar.classList.add("hidden");
+        content.classList.add("collapsed");
+      } else {
+        sidebar.classList.remove("hidden");
+        content.classList.remove("collapsed");
+      }
+
+      // Se quiser abrir/fechar ao clicar na logo no mobile
+      logoContainer.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          toggleSidebarAndLogo();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
