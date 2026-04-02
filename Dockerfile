@@ -19,4 +19,10 @@ RUN chown -R www-data:www-data /var/www/html/ \
 # Copia o composer vendor da raiz se existir
 COPY vendor/ /var/www/html/vendor/
 
+# Script de entrypoint (importa SQL na primeira execução)
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
+
+ENTRYPOINT ["docker-entrypoint.sh"]

@@ -6,3 +6,4 @@ webhookbackup.php
 webhookphp-backup.php
 *.zip
 *.sql
+!tensaiplus.sql
