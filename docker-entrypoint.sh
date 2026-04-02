@@ -1,22 +1,16 @@
 #!/bin/bash
 set -e
 
-# Importa o SQL apenas na primeira vez (cria um marker)
+# Importa o SQL apenas na primeira vez
 if [ ! -f /var/www/html/.db-imported ] && [ -f /var/www/html/tensaiplus.sql ]; then
-    echo "Aguardando MySQL ficar disponível..."
+    echo "Aguardando MySQL ficar disponivel..."
+    DB_HOST="${DB_HOST:-localhost}"
+    DB_USER="${DB_USERNAME:-root}"
+    DB_PASS="${DB_PASSWORD:-}"
+    DB_NAME="${DB_DATABASE:-tensaiplus}"
+
     for i in $(seq 1 30); do
-        if php -r "
-            \$c = @new mysqli(
-                getenv('DB_HOST') ?: 'localhost',
-                getenv('DB_USERNAME') ?: 'root',
-                getenv('DB_PASSWORD') ?: '',
-                '',
-                3306
-            );
-            if (\$c->connect_error) exit(1);
-            \$c->close();
-            exit(0);
-        " 2>/dev/null; then
+        if mysqladmin ping -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" --silent 2>/dev/null; then
             echo "MySQL conectado!"
             break
         fi
@@ -24,35 +18,14 @@ if [ ! -f /var/www/html/.db-imported ] && [ -f /var/www/html/tensaiplus.sql ]; t
         sleep 2
     done
 
-    echo "Criando database tensaiplus e importando dados..."
-    php -r "
-        \$host = getenv('DB_HOST') ?: 'localhost';
-        \$user = getenv('DB_USERNAME') ?: 'root';
-        \$pass = getenv('DB_PASSWORD') ?: '';
-        \$db   = getenv('DB_DATABASE') ?: 'tensaiplus';
+    echo "Criando database $DB_NAME..."
+    mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;" 2>/dev/null
 
-        \$c = new mysqli(\$host, \$user, \$pass);
-        \$c->query(\"CREATE DATABASE IF NOT EXISTS \\\`\$db\\\`\");
-        \$c->select_db(\$db);
-
-        \$sql = file_get_contents('/var/www/html/tensaiplus.sql');
-        \$c->multi_query(\$sql);
-
-        // Consume all results
-        do {
-            if (\$result = \$c->store_result()) \$result->free();
-        } while (\$c->more_results() && \$c->next_result());
-
-        if (\$c->errno) {
-            echo 'Erro: ' . \$c->error . PHP_EOL;
-        } else {
-            echo 'SQL importado com sucesso!' . PHP_EOL;
-        }
-        \$c->close();
-    "
+    echo "Importando tensaiplus.sql..."
+    mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < /var/www/html/tensaiplus.sql 2>&1
 
     touch /var/www/html/.db-imported
-    echo "Importação concluída!"
+    echo "Importacao concluida com sucesso!"
 fi
 
 # Inicia o Apache
