@@ -1,5 +1,7 @@
 <?php
 // Script para importar o dump SQL na primeira execução
+// Desabilita exceptions ANTES de qualquer conexão
+mysqli_report(MYSQLI_REPORT_OFF);
 
 $host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USERNAME') ?: 'root';
@@ -12,14 +14,10 @@ echo "Conectando em $host como $user...\n";
 // Tenta conectar com retry
 $conn = null;
 for ($i = 1; $i <= 30; $i++) {
-    try {
-        $conn = new mysqli($host, $user, $pass);
-        if (!$conn->connect_error) {
-            echo "MySQL conectado na tentativa $i!\n";
-            break;
-        }
-    } catch (Exception $e) {
-        // silenciar
+    $conn = @new mysqli($host, $user, $pass);
+    if ($conn && !$conn->connect_error) {
+        echo "MySQL conectado na tentativa $i!\n";
+        break;
     }
     echo "Tentativa $i/30...\n";
     sleep(3);
@@ -30,9 +28,6 @@ if (!$conn || $conn->connect_error) {
     echo "ERRO: Nao conseguiu conectar ao MySQL\n";
     exit(1);
 }
-
-// Desabilita exceptions do mysqli para tratar erros manualmente
-mysqli_report(MYSQLI_REPORT_OFF);
 
 // Cria database
 $conn->query("CREATE DATABASE IF NOT EXISTS `$db`");
@@ -56,10 +51,10 @@ if (!file_exists($sqlFile)) {
 $sql = file_get_contents($sqlFile);
 echo "Arquivo SQL carregado (" . strlen($sql) . " bytes)\n";
 
-// Executa com multi_query
+// Executa multi_query
 $conn->multi_query($sql);
 
-// Consome todos os resultados (ignorando erros de tabela existente)
+// Consome TODOS os resultados
 $count = 0;
 $errors = 0;
 do {
@@ -67,25 +62,27 @@ do {
     if ($result = $conn->store_result()) {
         $result->free();
     }
-    if ($conn->errno) {
+    if ($conn->errno && $conn->errno != 1050) {
         $errors++;
-        // Mostra apenas erros que nao sejam "table already exists"
-        if ($conn->errno != 1050) {
-            echo "Erro na query $count (errno {$conn->errno}): " . $conn->error . "\n";
-        }
+        echo "Erro query $count (errno {$conn->errno}): " . $conn->error . "\n";
     }
 } while ($conn->more_results() && $conn->next_result());
 
-echo "SQL executado ($count queries, $errors erros ignorados)\n";
-
-// Verifica se importou
+echo "SQL executado ($count statements, $errors erros)\n";
 $conn->close();
-$conn2 = new mysqli($host, $user, $pass, $db);
-$result = $conn2->query("SHOW TABLES");
-echo "Tabelas no banco:\n";
-while ($row = $result->fetch_array()) {
-    echo "  - " . $row[0] . "\n";
+
+// Verifica tabelas criadas
+$conn2 = @new mysqli($host, $user, $pass, $db);
+if ($conn2 && !$conn2->connect_error) {
+    $result = $conn2->query("SHOW TABLES");
+    $tableCount = 0;
+    echo "Tabelas no banco:\n";
+    while ($row = $result->fetch_array()) {
+        echo "  - " . $row[0] . "\n";
+        $tableCount++;
+    }
+    echo "Total: $tableCount tabelas\n";
+    $conn2->close();
 }
-$conn2->close();
 
 echo "=== IMPORTACAO CONCLUIDA ===\n";
