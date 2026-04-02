@@ -33,9 +33,22 @@ echo "Database '$db' selecionado.\n";
 
 $result = $conn->query("SHOW TABLES LIKE 'usuarios'");
 if ($result && $result->num_rows > 0) {
-    echo "Tabela 'usuarios' ja existe. Pulando importacao.\n";
-    $conn->close();
-    exit(0);
+    // Verifica se ferramentas tem dados (pode ter sido criada com schema errado)
+    $fResult = $conn->query("SELECT COUNT(*) as c FROM ferramentas");
+    $fCount = $fResult ? $fResult->fetch_assoc()['c'] : 0;
+    if ($fCount > 0) {
+        echo "Banco ja importado ($fCount ferramentas). Pulando.\n";
+        $conn->close();
+        exit(0);
+    }
+    // Ferramentas vazia = precisa re-importar, dropa tudo primeiro
+    echo "Tabelas existem mas ferramentas vazia. Dropando e re-importando...\n";
+    $tables = $conn->query("SHOW TABLES");
+    while ($row = $tables->fetch_array()) {
+        $conn->query("SET FOREIGN_KEY_CHECKS = 0");
+        $conn->query("DROP TABLE IF EXISTS `{$row[0]}`");
+    }
+    $conn->query("SET FOREIGN_KEY_CHECKS = 1");
 }
 
 if (!file_exists($sqlFile)) {
