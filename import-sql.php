@@ -1,5 +1,7 @@
 <?php
 // Script para importar o dump SQL na primeira execução
+// Bloqueia acesso via web
+if (php_sapi_name() !== 'cli') { http_response_code(403); exit('Forbidden'); }
 mysqli_report(MYSQLI_REPORT_OFF);
 
 $host = getenv('DB_HOST') ?: 'localhost';
