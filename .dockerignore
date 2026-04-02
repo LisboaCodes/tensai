@@ -2,6 +2,7 @@ Dockerfile
 .dockerignore
 .git
 *.sql
+!tensaiplus.sql
 *.zip
 webhook_log.txt
 bkp/
