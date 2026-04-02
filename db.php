@@ -7,11 +7,12 @@ $username = getenv('DB_USERNAME') ?: "tensaiplus";
 $password = getenv('DB_PASSWORD') ?: "92c1c96b07e068";
 $dbname = getenv('DB_DATABASE') ?: "tensaiplus";
 
-// Cria a conexão
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Verifica a conexão
-if ($conn->connect_error) {
+// Cria a conexão (primeiro sem database para garantir que ele existe)
+$conn = new mysqli($servername, $username, $password);
+if (!$conn->connect_error) {
+    $conn->query("CREATE DATABASE IF NOT EXISTS `$dbname`");
+    $conn->select_db($dbname);
+} else {
     die("Falha na conexão: " . $conn->connect_error);
 }
 
