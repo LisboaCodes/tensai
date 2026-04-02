@@ -31,6 +31,9 @@ if (!$conn || $conn->connect_error) {
     exit(1);
 }
 
+// Desabilita exceptions do mysqli para tratar erros manualmente
+mysqli_report(MYSQLI_REPORT_OFF);
+
 // Cria database
 $conn->query("CREATE DATABASE IF NOT EXISTS `$db`");
 $conn->select_db($db);
@@ -56,21 +59,27 @@ echo "Arquivo SQL carregado (" . strlen($sql) . " bytes)\n";
 // Executa com multi_query
 $conn->multi_query($sql);
 
-// Consome todos os resultados
+// Consome todos os resultados (ignorando erros de tabela existente)
 $count = 0;
+$errors = 0;
 do {
     $count++;
     if ($result = $conn->store_result()) {
         $result->free();
     }
     if ($conn->errno) {
-        echo "Erro na query $count: " . $conn->error . "\n";
+        $errors++;
+        // Mostra apenas erros que nao sejam "table already exists"
+        if ($conn->errno != 1050) {
+            echo "Erro na query $count (errno {$conn->errno}): " . $conn->error . "\n";
+        }
     }
 } while ($conn->more_results() && $conn->next_result());
 
-echo "SQL executado ($count queries processadas)\n";
+echo "SQL executado ($count queries, $errors erros ignorados)\n";
 
 // Verifica se importou
+$conn->close();
 $conn2 = new mysqli($host, $user, $pass, $db);
 $result = $conn2->query("SHOW TABLES");
 echo "Tabelas no banco:\n";
